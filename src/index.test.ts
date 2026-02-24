@@ -362,6 +362,82 @@ test('ValidationResult has correct shape', () => {
 });
 
 // ===========================================================================
+// requiredPatterns tests
+// ===========================================================================
+
+console.log('\n── CommitSentinel: requiredPatterns ─────────────────────\n');
+
+const rp = new CommitSentinel({
+  tense: null,
+  case: null,
+  requiredPatterns: [
+    { pattern: '[A-Z]+-\\d+', message: 'Must include a Jira ticket (e.g. PROJ-123)' },
+  ],
+});
+
+test('accepts message with required pattern present', () => {
+  const r = rp.validate('PROJ-456 Fix the login bug');
+  assert(r.valid, JSON.stringify(r.errors));
+});
+test('rejects message missing required pattern', () => {
+  const r = rp.validate('Fix the login bug here');
+  assert(!r.valid);
+  assert(r.errors.some(e => e.includes('Jira ticket')), JSON.stringify(r.errors));
+});
+test('uses default error message when no custom message provided', () => {
+  const rpDefault = new CommitSentinel({
+    tense: null,
+    case: null,
+    requiredPatterns: [{ pattern: 'v\\d+\\.\\d+' }],
+  });
+  const r = rpDefault.validate('Fix the login bug here');
+  assert(!r.valid);
+  assert(r.errors.some(e => e.includes('must match required pattern')), JSON.stringify(r.errors));
+});
+test('accepts message matching default pattern', () => {
+  const rpDefault = new CommitSentinel({
+    tense: null,
+    case: null,
+    requiredPatterns: [{ pattern: 'v\\d+\\.\\d+' }],
+  });
+  const r = rpDefault.validate('Bump to v2.3 release');
+  assert(r.valid, JSON.stringify(r.errors));
+});
+test('validates multiple required patterns (all must match)', () => {
+  const rpMulti = new CommitSentinel({
+    tense: null,
+    case: null,
+    requiredPatterns: [
+      { pattern: '[A-Z]+-\\d+', message: 'Needs ticket' },
+      { pattern: 'v\\d+\\.\\d+', message: 'Needs version' },
+    ],
+  });
+  const r1 = rpMulti.validate('PROJ-1 Bump to v1.0 now');
+  assert(r1.valid, JSON.stringify(r1.errors));
+
+  const r2 = rpMulti.validate('PROJ-1 Fix bug in module');
+  assert(!r2.valid);
+  assert(r2.errors.some(e => e.includes('Needs version')), JSON.stringify(r2.errors));
+  assert(!r2.errors.some(e => e.includes('Needs ticket')), 'ticket pattern should pass');
+});
+test('requiredPatterns work alongside other rules', () => {
+  const rpCombo = new CommitSentinel({
+    tense: 'imperative',
+    case: 'sentence',
+    requiredPatterns: [
+      { pattern: '[A-Z]+-\\d+', message: 'Needs ticket' },
+    ],
+    ignoredPrefixes: ['[A-Z]+-\\d+'],
+  });
+  const r1 = rpCombo.validate('PROJ-99 Add login feature');
+  assert(r1.valid, JSON.stringify(r1.errors));
+
+  const r2 = rpCombo.validate('Add login feature here');
+  assert(!r2.valid);
+  assert(r2.errors.some(e => e.includes('Needs ticket')), JSON.stringify(r2.errors));
+});
+
+// ===========================================================================
 // Results
 // ===========================================================================
 

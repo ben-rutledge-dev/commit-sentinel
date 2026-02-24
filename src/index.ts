@@ -28,6 +28,7 @@ export const DEFAULT_CONFIG: SentinelConfig = {
   scopePattern:                 null,
   forbiddenWords:               ['WIP', 'wip', 'fixup', 'FIXUP'],
   ignoredPrefixes:              [],
+  requiredPatterns:             [],
   requireBlankLineAfterSubject: false,
   customPattern:                null,
 };
@@ -195,6 +196,15 @@ export class CommitSentinel {
       }
     }
 
+    // --- Required patterns ---
+    for (const entry of this.config.requiredPatterns) {
+      const regex = new RegExp(entry.pattern);
+      if (!regex.test(subject)) {
+        const msg = entry.message ?? `Subject must match required pattern: ${entry.pattern}`;
+        errors.push(msg);
+      }
+    }
+
     // --- Generic messages ---
     if (this.config.noGenericMessages) {
       const GENERIC = new Set(['update','fix','change','edit','stuff','things','misc','test','asdf','temp']);
@@ -261,4 +271,4 @@ export class CommitSentinel {
 }
 
 // Re-export types so consumers can import everything from one place
-export type { SentinelConfig, ValidationResult, VerbTense, TenseMode, CaseMode } from './types';
+export type { SentinelConfig, ValidationResult, VerbTense, TenseMode, CaseMode, RequiredPattern } from './types';

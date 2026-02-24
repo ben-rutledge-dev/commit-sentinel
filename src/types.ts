@@ -120,6 +120,19 @@ export interface SentinelConfig {
   requireBlankLineAfterSubject: boolean;
 
   /**
+   * Regex patterns that must each match somewhere in the commit subject.
+   * Useful for enforcing version numbers, ticket IDs, etc.
+   *
+   * Each entry is an object with:
+   *   - `pattern`: a regex string to test against the subject
+   *   - `message`: (optional) custom error message shown on failure
+   *
+   * e.g. [{ "pattern": "[A-Z]+-\\d+", "message": "Must include a Jira ticket (e.g. PROJ-123)" }]
+   * @default []
+   */
+  requiredPatterns: RequiredPattern[];
+
+  /**
    * A custom regex string the subject line must match. When provided, all
    * other checks except forbiddenWords are bypassed.
    * @default null
@@ -170,4 +183,11 @@ export interface CaseValidator {
   test: (msg: string) => boolean;
   fix: (msg: string) => string;
   description: string;
+}
+
+export interface RequiredPattern {
+  /** Regex string to test against the commit subject. */
+  pattern: string;
+  /** Custom error message shown when the pattern does not match. */
+  message?: string;
 }
