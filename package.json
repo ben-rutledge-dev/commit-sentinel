@@ -1,0 +1,33 @@
+{
+  "name": "commit-sentinel",
+  "version": "2.0.0",
+  "description": "Enforce commit message conventions: tense, casing, length, and more via git hooks",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "commit-sentinel": "./bin/cli.js",
+    "commit-sentinel-hook": "./bin/hook.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "test": "tsc --noEmit false --outDir dist src/index.test.ts --esModuleInterop --module commonjs --target ES2020 --skipLibCheck && node dist/index.test.js",
+    "prepare": "tsc",
+    "prepublishOnly": "tsc"
+  },
+  "files": [
+    "dist/",
+    "bin/",
+    "README.md"
+  ],
+  "keywords": ["git", "commit", "hooks", "conventional-commits", "linting", "typescript"],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "compromise": "^14.10.0"
+  }
+}
