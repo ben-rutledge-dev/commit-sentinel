@@ -51,6 +51,7 @@ Create `.commit-sentinel.json` in your project root (or run `npx commit-sentinel
   "scopePattern": null,
   "forbiddenWords": ["WIP", "wip", "fixup"],
   "ignoredPrefixes": [],
+  "requiredPatterns": [],
   "requireBlankLineAfterSubject": false,
   "customPattern": null
 }
@@ -75,6 +76,7 @@ You can also embed the config in `package.json` under a `"commitSentinel"` key.
 | `scopePattern` | `string \| null` | `null` | Regex the scope must match, e.g. `"^[a-z-]+$"` |
 | `forbiddenWords` | `string[]` | `["WIP","wip","fixup"]` | Words/phrases that must not appear in the message |
 | `ignoredPrefixes` | `string[]` | `[]` | Regex patterns for prefixes stripped before case/tense checks (e.g. ticket refs) |
+| `requiredPatterns` | `object[]` | `[]` | Patterns that must each match the subject. Each entry has `pattern` (regex string) and optional `message` (custom error) |
 | `requireBlankLineAfterSubject` | `boolean` | `false` | Require a blank line between the subject and body |
 | `customPattern` | `string \| null` | `null` | A regex the entire subject must match (overrides all other checks) |
 
@@ -121,6 +123,19 @@ You can also embed the config in `package.json` under a `"commitSentinel"` key.
   "minLength": 8,
   "maxLength": 100,
   "forbiddenWords": ["WIP", "wip", "TODO", "FIXME"]
+}
+```
+
+### Require a Jira ticket and version number
+```json
+{
+  "tense": "imperative",
+  "case": "sentence",
+  "requiredPatterns": [
+    { "pattern": "[A-Z]+-\\d+", "message": "Must include a Jira ticket (e.g. PROJ-123)" },
+    { "pattern": "v\\d+\\.\\d+", "message": "Must include a version number (e.g. v1.2)" }
+  ],
+  "ignoredPrefixes": ["[A-Z]+-\\d+"]
 }
 ```
 
