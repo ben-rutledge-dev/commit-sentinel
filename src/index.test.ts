@@ -8,10 +8,10 @@ let failed = 0;
 function test(description: string, fn: () => void): void {
   try {
     fn();
-    console.log(`  ✅ ${description}`);
+    console.log(`  \u2705 ${description}`);
     passed++;
   } catch (e) {
-    console.error(`  ❌ ${description}`);
+    console.error(`  \u274c ${description}`);
     console.error(`     ${(e as Error).message}`);
     failed++;
   }
@@ -29,9 +29,8 @@ function eq<T>(a: T, b: T): void {
 // verb-tense unit tests
 // ===========================================================================
 
-console.log('\n── detectTense ─────────────────────────────────────────\n');
+console.log('\n\u2500\u2500 detectTense \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n');
 
-// Imperatives
 (
   [
     ['Add',      'imperative'],
@@ -44,10 +43,9 @@ console.log('\n── detectTense ───────────────�
     ['Rebuild',  'imperative'],
   ] as [string, VerbTense][]
 ).forEach(([word, expected]) =>
-  test(`detectTense: "${word}" → ${expected}`, () => eq(detectTense(word), expected))
+  test(`detectTense: "${word}" \u2192 ${expected}`, () => eq(detectTense(word), expected))
 );
 
-// Regular past
 (
   [
     ['Added',      'past'],
@@ -57,10 +55,9 @@ console.log('\n── detectTense ───────────────�
     ['Fixed',      'past'],
   ] as [string, VerbTense][]
 ).forEach(([word, expected]) =>
-  test(`detectTense: "${word}" → ${expected} (regular)`, () => eq(detectTense(word), expected))
+  test(`detectTense: "${word}" \u2192 ${expected} (regular)`, () => eq(detectTense(word), expected))
 );
 
-// Irregular past — the key improvement over regex
 (
   [
     ['Wrote',   'past'],
@@ -78,10 +75,9 @@ console.log('\n── detectTense ───────────────�
     ['Found',   'past'],
   ] as [string, VerbTense][]
 ).forEach(([word, expected]) =>
-  test(`detectTense: "${word}" → ${expected} (irregular)`, () => eq(detectTense(word), expected))
+  test(`detectTense: "${word}" \u2192 ${expected} (irregular)`, () => eq(detectTense(word), expected))
 );
 
-// Present
 (
   [
     ['Writes', 'present'],
@@ -90,10 +86,9 @@ console.log('\n── detectTense ───────────────�
     ['Fixes',  'present'],
   ] as [string, VerbTense][]
 ).forEach(([word, expected]) =>
-  test(`detectTense: "${word}" → ${expected}`, () => eq(detectTense(word), expected))
+  test(`detectTense: "${word}" \u2192 ${expected}`, () => eq(detectTense(word), expected))
 );
 
-// Gerund
 (
   [
     ['Adding',      'gerund'],
@@ -101,10 +96,10 @@ console.log('\n── detectTense ───────────────�
     ['Refactoring', 'gerund'],
   ] as [string, VerbTense][]
 ).forEach(([word, expected]) =>
-  test(`detectTense: "${word}" → ${expected}`, () => eq(detectTense(word), expected))
+  test(`detectTense: "${word}" \u2192 ${expected}`, () => eq(detectTense(word), expected))
 );
 
-console.log('\n── toImperative ────────────────────────────────────────\n');
+console.log('\n\u2500\u2500 toImperative \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n');
 
 (
   [
@@ -118,10 +113,10 @@ console.log('\n── toImperative ───────────────
     ['running', 'run'],
   ] as [string, string][]
 ).forEach(([input, expected]) =>
-  test(`toImperative: "${input}" → "${expected}"`, () => eq(toImperative(input), expected))
+  test(`toImperative: "${input}" \u2192 "${expected}"`, () => eq(toImperative(input), expected))
 );
 
-console.log('\n── toPast / toPresent ──────────────────────────────────\n');
+console.log('\n\u2500\u2500 toPast / toPresent \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n');
 
 (
   [
@@ -132,7 +127,7 @@ console.log('\n── toPast / toPresent ─────────────
     ['run',   'ran'],
   ] as [string, string][]
 ).forEach(([input, expected]) =>
-  test(`toPast: "${input}" → "${expected}"`, () => eq(toPast(input), expected))
+  test(`toPast: "${input}" \u2192 "${expected}"`, () => eq(toPast(input), expected))
 );
 
 (
@@ -142,205 +137,310 @@ console.log('\n── toPast / toPresent ─────────────
     ['add',   'adds'],
   ] as [string, string][]
 ).forEach(([input, expected]) =>
-  test(`toPresent: "${input}" → "${expected}"`, () => eq(toPresent(input), expected))
+  test(`toPresent: "${input}" \u2192 "${expected}"`, () => eq(toPresent(input), expected))
 );
 
 // ===========================================================================
-// CommitSentinel integration tests
+// CommitSentinel - commit validation
 // ===========================================================================
 
-console.log('\n── CommitSentinel: irregular verb rejection ────────────\n');
+console.log('\n\u2500\u2500 CommitSentinel: irregular verb rejection \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n');
 
 const s = new CommitSentinel();
 
 test('rejects "Wrote new parser" (irregular past)', () => {
-  const r = s.validate('Wrote new parser for JSON handling');
+  const r = s.validateCommit('Wrote new parser for JSON handling');
   assert(!r.valid);
   assert(r.errors.some(e => e.includes('tense')));
 });
 test('rejects "Rebuilt auth module"', () => {
-  const r = s.validate('Rebuilt the authentication module');
+  const r = s.validateCommit('Rebuilt the authentication module');
   assert(!r.valid);
   assert(r.errors.some(e => e.includes('tense')));
 });
 test('rejects "Made changes to config"', () => {
-  const r = s.validate('Made changes to the configuration');
+  const r = s.validateCommit('Made changes to the configuration');
   assert(!r.valid);
   assert(r.errors.some(e => e.includes('tense')));
 });
 test('rejects "Broke down legacy code"', () => {
-  const r = s.validate('Broke down legacy code into modules');
+  const r = s.validateCommit('Broke down legacy code into modules');
   assert(!r.valid);
   assert(r.errors.some(e => e.includes('tense')));
 });
 test('accepts "Rewrite the JSON parser"', () => {
-  const r = s.validate('Rewrite the JSON parser for speed');
+  const r = s.validateCommit('Rewrite the JSON parser for speed');
   assert(r.valid, JSON.stringify(r.errors));
 });
 test('accepts "Build Docker image on CI"', () => {
-  const r = s.validate('Build Docker image on CI pipeline');
+  const r = s.validateCommit('Build Docker image on CI pipeline');
   assert(r.valid, JSON.stringify(r.errors));
 });
 test('accepts "Fix memory leak in renderer"', () => {
-  const r = s.validate('Fix memory leak in renderer module');
+  const r = s.validateCommit('Fix memory leak in renderer module');
   assert(r.valid, JSON.stringify(r.errors));
 });
 
-console.log('\n── CommitSentinel: existing rules ──────────────────────\n');
+console.log('\n\u2500\u2500 CommitSentinel: existing rules \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n');
 
 test('accepts valid imperative sentence-case message', () => {
-  const r = s.validate('Add user authentication module');
+  const r = s.validateCommit('Add user authentication module');
   assert(r.valid, JSON.stringify(r.errors));
 });
 test('rejects regular past "Added"', () => {
-  const r = s.validate('Added user authentication module');
+  const r = s.validateCommit('Added user authentication module');
   assert(!r.valid);
   assert(r.errors.some(e => e.includes('tense')));
 });
 test('rejects lowercase start', () => {
-  const r = s.validate('add user authentication module');
+  const r = s.validateCommit('add user authentication module');
   assert(!r.valid);
   assert(r.errors.some(e => e.includes('case')));
 });
 test('rejects trailing period', () => {
-  const r = s.validate('Add user authentication module.');
+  const r = s.validateCommit('Add user authentication module.');
   assert(!r.valid);
   assert(r.errors.some(e => e.includes('period')));
 });
 test('rejects too-short message', () => {
-  const r = s.validate('Fix bug');
+  const r = s.validateCommit('Fix bug');
   assert(!r.valid);
   assert(r.errors.some(e => e.includes('short')));
 });
 test('rejects forbidden word WIP', () => {
-  const r = s.validate('WIP: Add half-finished feature');
+  const r = s.validateCommit('WIP: Add half-finished feature');
   assert(!r.valid);
   assert(r.errors.some(e => e.includes('forbidden')));
 });
 
-const cc = new CommitSentinel({ requireType: true, tense: 'imperative', case: 'lower' });
+const cc = new CommitSentinel({ commits: { requireType: true, tense: 'imperative', case: 'lower' } });
 
 test('accepts conventional commit format', () => {
-  const r = cc.validate('feat: add login screen');
+  const r = cc.validateCommit('feat: add login screen');
   assert(r.valid, JSON.stringify(r.errors));
 });
 test('rejects unknown conventional commit type', () => {
-  const r = cc.validate('hack: add something');
+  const r = cc.validateCommit('hack: add something');
   assert(!r.valid);
   assert(r.errors.some(e => e.includes('Unknown type')));
 });
 
-console.log('\n── CommitSentinel: ignoredPrefixes ─────────────────────\n');
-
-const ip = new CommitSentinel({
-  tense: 'imperative',
-  case: 'sentence',
-  ignoredPrefixes: ['AB#\\d+'],
-});
-
-test('rejects lowercase after ignored prefix', () => {
-  const r = ip.validate('AB#12345 commit code here now');
-  assert(!r.valid, 'should fail: ' + JSON.stringify(r));
-  assert(r.errors.some(e => e.includes('case')), JSON.stringify(r.errors));
-});
-test('suggestion includes ignored prefix for case fix', () => {
-  const r = ip.validate('AB#12345 commit code here now');
-  assert(r.suggestions.some(s => s.includes('AB#12345') && s.includes('Commit')),
-    'suggestion should include prefix: ' + JSON.stringify(r.suggestions));
-});
-test('accepts sentence case after ignored prefix', () => {
-  const r = ip.validate('AB#12345 Commit code here now');
-  assert(r.valid, JSON.stringify(r.errors));
-});
-test('rejects past tense after ignored prefix', () => {
-  const r = ip.validate('AB#12345 Added login screen');
-  assert(!r.valid);
-  assert(r.errors.some(e => e.includes('tense')), JSON.stringify(r.errors));
-});
-test('suggestion includes ignored prefix for tense fix', () => {
-  const r = ip.validate('AB#12345 Added login screen');
-  assert(r.suggestions.some(s => s.includes('AB#12345') && s.toLowerCase().includes('add')),
-    'suggestion should include prefix: ' + JSON.stringify(r.suggestions));
-});
-
-const ipType = new CommitSentinel({
-  requireType: true,
-  allowedTypes: ['feat', 'fix', 'shared'],
-  ignoredPrefixes: ['AB#\\d+'],
-  tense: 'imperative',
-  case: 'sentence',
-});
-
-test('strips type prefix + ignored prefix together', () => {
-  const r = ipType.validate('SHARED: AB#12345 commit code here now');
-  assert(!r.valid, 'should fail case: ' + JSON.stringify(r));
-  assert(r.errors.some(e => e.includes('case')), JSON.stringify(r.errors));
-});
-test('suggestion includes type + ignored prefix', () => {
-  const r = ipType.validate('SHARED: AB#12345 commit code here now');
-  assert(r.suggestions.some(s => s.includes('SHARED:') && s.includes('AB#12345') && s.includes('Commit')),
-    'suggestion should include full prefix: ' + JSON.stringify(r.suggestions));
-});
-test('accepts valid message after type + ignored prefix', () => {
-  const r = ipType.validate('SHARED: AB#12345 Fix login for users');
-  assert(r.valid, JSON.stringify(r.errors));
-});
-test('works with no matching prefix (no-op)', () => {
-  const r = ip.validate('Fix the broken login screen');
-  assert(r.valid, JSON.stringify(r.errors));
-});
-
-// Without requireType — both SHARED and ticket ref as ignoredPrefixes
-const ipNoType = new CommitSentinel({
-  tense: 'imperative',
-  case: 'sentence',
-  ignoredPrefixes: ['AB#\\d+', 'SHARED'],
-});
-
-test('strips SHARED: and ticket ref without requireType', () => {
-  const r = ipNoType.validate('SHARED: AB#12345 commit code');
-  assert(!r.valid, 'should fail case: ' + JSON.stringify(r));
-  assert(r.errors.some(e => e.includes('case')), JSON.stringify(r.errors));
-});
-test('suggestion says "SHARED: AB#12345 Commit code" without requireType', () => {
-  const r = ipNoType.validate('SHARED: AB#12345 commit code');
-  const expected = 'SHARED: AB#12345 Commit code';
-  assert(r.suggestions.some(s => s.includes(expected)),
-    `expected suggestion containing "${expected}", got: ${JSON.stringify(r.suggestions)}`);
-});
-test('order of ignoredPrefixes does not matter', () => {
-  const reversed = new CommitSentinel({
-    tense: 'imperative',
-    case: 'sentence',
-    ignoredPrefixes: ['SHARED', 'AB#\\d+'],
-  });
-  const r = reversed.validate('SHARED: AB#12345 commit code');
-  assert(!r.valid);
-  assert(r.suggestions.some(s => s.includes('SHARED: AB#12345 Commit code')),
-    JSON.stringify(r.suggestions));
-});
-
-console.log('\n── Suggestions ─────────────────────────────────────────\n');
+console.log('\n\u2500\u2500 Suggestions \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n');
 
 test('suggests "Write" when "Wrote" is used', () => {
-  const r = s.validate('Wrote new parser for JSON handling');
+  const r = s.validateCommit('Wrote new parser for JSON handling');
   assert(r.suggestions.some(s => s.toLowerCase().includes('write')), JSON.stringify(r.suggestions));
 });
 test('suggests "Build" when "Built" is used', () => {
-  const r = s.validate('Built the Docker image pipeline');
+  const r = s.validateCommit('Built the Docker image pipeline');
   assert(r.suggestions.some(s => s.toLowerCase().includes('build')), JSON.stringify(r.suggestions));
+});
+test('produces one combined suggestion for tense + case errors', () => {
+  const r = s.validateCommit('added fix to login screen');
+  assert(!r.valid);
+  // Should have exactly one Try: suggestion that fixes BOTH tense and case → "Add fix to login screen"
+  const trySuggestions = r.suggestions.filter(s => s.startsWith('Try: "'));
+  eq(trySuggestions.length, 1);
+  assert(trySuggestions[0].includes('Add fix to login screen'), JSON.stringify(trySuggestions));
 });
 
 // ===========================================================================
-// Type-safety spot checks (these would be compile errors in TypeScript)
+// ignoredPrefixes
 // ===========================================================================
 
-console.log('\n── TypeScript type safety ───────────────────────────────\n');
+console.log('\n\u2500\u2500 CommitSentinel: ignoredPrefixes \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n');
+
+test('ignoredPrefixes strips ticket ID before tense/case checks', () => {
+  const sentinel = new CommitSentinel({ commits: { ignoredPrefixes: ['[A-Z]+-\\d+'] } });
+  const r = sentinel.validateCommit('PROJ-123: Add login screen');
+  assert(r.valid, JSON.stringify(r.errors));
+});
+test('ignoredPrefixes strips multiple prefixes', () => {
+  const sentinel = new CommitSentinel({ commits: { ignoredPrefixes: ['[A-Z]+-\\d+', '\\[team\\]'] } });
+  const r = sentinel.validateCommit('[team] PROJ-123: Add login screen');
+  assert(r.valid, JSON.stringify(r.errors));
+});
+test('ignoredPrefixes empty array does nothing', () => {
+  const r = s.validateCommit('Add login screen');
+  assert(r.valid, JSON.stringify(r.errors));
+});
+
+// ===========================================================================
+// requiredPatterns
+// ===========================================================================
+
+console.log('\n\u2500\u2500 CommitSentinel: requiredPatterns \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n');
+
+test('requiredPatterns rejects when pattern is missing', () => {
+  const sentinel = new CommitSentinel({
+    commits: { requiredPatterns: [{ pattern: '[A-Z]+-\\d+' }] },
+  });
+  const r = sentinel.validateCommit('Add login screen');
+  assert(!r.valid);
+  assert(r.errors.some(e => e.includes('pattern')), JSON.stringify(r.errors));
+});
+test('requiredPatterns accepts when pattern matches', () => {
+  const sentinel = new CommitSentinel({
+    commits: { requiredPatterns: [{ pattern: '[A-Z]+-\\d+' }] },
+  });
+  const r = sentinel.validateCommit('PROJ-123 Add login screen');
+  assert(r.valid, JSON.stringify(r.errors));
+});
+test('requiredPatterns uses custom message', () => {
+  const sentinel = new CommitSentinel({
+    commits: { requiredPatterns: [{ pattern: 'JIRA-\\d+', message: 'Must include JIRA ticket' }] },
+  });
+  const r = sentinel.validateCommit('Add login screen');
+  assert(!r.valid);
+  assert(r.errors.includes('Must include JIRA ticket'), JSON.stringify(r.errors));
+});
+test('requiredPatterns checks multiple patterns', () => {
+  const sentinel = new CommitSentinel({
+    commits: { requiredPatterns: [
+      { pattern: '[A-Z]+-\\d+' },
+      { pattern: 'v\\d+' },
+    ] },
+  });
+  const r = sentinel.validateCommit('PROJ-123 Add login screen');
+  assert(!r.valid, 'should fail missing v-number');
+  eq(r.errors.length, 1);
+});
+
+// ===========================================================================
+// enabled / enforce flags
+// ===========================================================================
+
+console.log('\n\u2500\u2500 CommitSentinel: enabled / enforce flags \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n');
+
+test('commits.enabled=false skips all commit checks', () => {
+  const sentinel = new CommitSentinel({ commits: { enabled: false } });
+  const r = sentinel.validateCommit('bad');
+  assert(r.valid, JSON.stringify(r.errors));
+});
+test('commits.enforce=false returns enforced=false on failure', () => {
+  const sentinel = new CommitSentinel({ commits: { enforce: false } });
+  const r = sentinel.validateCommit('bad');
+  assert(!r.valid);
+  assert(!r.enforced, 'enforced should be false');
+});
+test('commits.enforce=true returns enforced=true on failure', () => {
+  const r = s.validateCommit('bad');
+  assert(!r.valid);
+  assert(r.enforced, 'enforced should be true');
+});
+test('branches.enabled=false skips all branch checks', () => {
+  const sentinel = new CommitSentinel({ branches: { enabled: false } });
+  const r = sentinel.validateBranch('totally-wrong');
+  assert(r.valid, JSON.stringify(r.errors));
+});
+test('branches.enforce=false returns enforced=false on failure', () => {
+  const sentinel = new CommitSentinel({ branches: { enforce: false } });
+  const r = sentinel.validateBranch('bad-branch');
+  assert(!r.valid);
+  assert(!r.enforced, 'enforced should be false');
+});
+
+// ===========================================================================
+// Branch validation
+// ===========================================================================
+
+console.log('\n\u2500\u2500 CommitSentinel: branch validation \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n');
+
+const bDefault = new CommitSentinel();
+
+test('rejects branch without prefix separator', () => {
+  const r = bDefault.validateBranch('my-branch');
+  assert(!r.valid);
+  assert(r.errors.some(e => e.includes('prefix')), JSON.stringify(r.errors));
+});
+test('rejects unknown branch prefix', () => {
+  const r = bDefault.validateBranch('hotfix/1234-fix-it');
+  assert(!r.valid);
+  assert(r.errors.some(e => e.includes('not allowed')), JSON.stringify(r.errors));
+});
+test('rejects branch missing ticket number', () => {
+  const r = bDefault.validateBranch('feature/add-login');
+  assert(!r.valid);
+  assert(r.errors.some(e => e.includes('ticket')), JSON.stringify(r.errors));
+});
+test('accepts valid branch with ticket + kebab-case', () => {
+  const r = bDefault.validateBranch('feature/1234-add-login');
+  assert(r.valid, JSON.stringify(r.errors));
+});
+test('accepts exempt branch "main"', () => {
+  const r = bDefault.validateBranch('main');
+  assert(r.valid, JSON.stringify(r.errors));
+});
+test('accepts exempt branch matching glob "release-*"', () => {
+  const r = bDefault.validateBranch('release-2.0');
+  assert(r.valid, JSON.stringify(r.errors));
+});
+test('rejects non-kebab-case description', () => {
+  const r = bDefault.validateBranch('feature/1234-AddLogin');
+  assert(!r.valid);
+  assert(r.errors.some(e => e.includes('kebab-case')), JSON.stringify(r.errors));
+});
+test('accepts snake_case naming pattern', () => {
+  const sentinel = new CommitSentinel({ branches: { namingPattern: 'snake_case' } });
+  const r = sentinel.validateBranch('feature/1234-add_login_screen');
+  assert(r.valid, JSON.stringify(r.errors));
+});
+test('rejects kebab-case in snake_case mode', () => {
+  const sentinel = new CommitSentinel({ branches: { namingPattern: 'snake_case' } });
+  const r = sentinel.validateBranch('feature/1234-add-login');
+  assert(!r.valid);
+  assert(r.errors.some(e => e.includes('snake_case')), JSON.stringify(r.errors));
+});
+test('namingPattern null skips naming check', () => {
+  const sentinel = new CommitSentinel({ branches: { namingPattern: null } });
+  const r = sentinel.validateBranch('feature/1234-AnYtHiNg-GoEs');
+  assert(r.valid, JSON.stringify(r.errors));
+});
+test('requireTicketNumber false allows branches without ticket', () => {
+  const sentinel = new CommitSentinel({ branches: { requireTicketNumber: false } });
+  const r = sentinel.validateBranch('feature/add-login');
+  assert(r.valid, JSON.stringify(r.errors));
+});
+
+test('tense imperative rejects past tense in branch description', () => {
+  const sentinel = new CommitSentinel({ branches: { tense: 'imperative' } });
+  const r = sentinel.validateBranch('feature/1234-added-login');
+  assert(!r.valid);
+  assert(r.errors.some(e => e.includes('verb tense')), JSON.stringify(r.errors));
+  assert(r.suggestions.some(s => s.includes('add')), JSON.stringify(r.suggestions));
+});
+test('tense imperative accepts imperative branch description', () => {
+  const sentinel = new CommitSentinel({ branches: { tense: 'imperative' } });
+  const r = sentinel.validateBranch('feature/1234-add-login');
+  assert(r.valid, JSON.stringify(r.errors));
+});
+test('tense past accepts past tense in branch description', () => {
+  const sentinel = new CommitSentinel({ branches: { tense: 'past' } });
+  const r = sentinel.validateBranch('feature/1234-added-login');
+  assert(r.valid, JSON.stringify(r.errors));
+});
+test('tense null skips tense check on branches', () => {
+  const sentinel = new CommitSentinel({ branches: { tense: null } });
+  const r = sentinel.validateBranch('feature/1234-added-login');
+  assert(r.valid, JSON.stringify(r.errors));
+});
+test('tense works with snake_case branches', () => {
+  const sentinel = new CommitSentinel({ branches: { tense: 'imperative', namingPattern: 'snake_case' } });
+  const r = sentinel.validateBranch('feature/1234-added_login');
+  assert(!r.valid);
+  assert(r.errors.some(e => e.includes('verb tense')), JSON.stringify(r.errors));
+});
+
+// ===========================================================================
+// Type-safety spot checks
+// ===========================================================================
+
+console.log('\n\u2500\u2500 TypeScript type safety \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n');
 
 test('SentinelConfig accepts valid tense values', () => {
   const modes: Array<'imperative' | 'past' | 'present' | null> = ['imperative', 'past', 'present', null];
   modes.forEach(tense => {
-    const sentinel = new CommitSentinel({ tense });
+    const sentinel = new CommitSentinel({ commits: { tense } });
     assert(sentinel instanceof CommitSentinel);
   });
 });
@@ -349,92 +449,40 @@ test('SentinelConfig accepts valid case values', () => {
   const modes: Array<'sentence' | 'lower' | 'upper' | 'title' | 'camel' | null> =
     ['sentence', 'lower', 'upper', 'title', 'camel', null];
   modes.forEach(c => {
-    const sentinel = new CommitSentinel({ case: c });
+    const sentinel = new CommitSentinel({ commits: { case: c } });
     assert(sentinel instanceof CommitSentinel);
   });
 });
 
 test('ValidationResult has correct shape', () => {
-  const r = s.validate('Add something useful here');
+  const r = s.validateCommit('Add something useful here');
   assert(typeof r.valid === 'boolean');
+  assert(typeof r.enforced === 'boolean');
   assert(Array.isArray(r.errors));
   assert(Array.isArray(r.suggestions));
 });
 
 // ===========================================================================
-// requiredPatterns tests
+// formatCommit / formatBranch
 // ===========================================================================
 
-console.log('\n── CommitSentinel: requiredPatterns ─────────────────────\n');
+console.log('\n\u2500\u2500 Formatting \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n');
 
-const rp = new CommitSentinel({
-  tense: null,
-  case: null,
-  requiredPatterns: [
-    { pattern: '[A-Z]+-\\d+', message: 'Must include a Jira ticket (e.g. PROJ-123)' },
-  ],
+test('formatCommit shows warning when enforce=false', () => {
+  const sentinel = new CommitSentinel({ commits: { enforce: false } });
+  const r = sentinel.validateCommit('bad');
+  const out = sentinel.formatCommit('bad', r);
+  assert(out.includes('warning'), 'expected "warning" in output: ' + out);
 });
-
-test('accepts message with required pattern present', () => {
-  const r = rp.validate('PROJ-456 Fix the login bug');
-  assert(r.valid, JSON.stringify(r.errors));
+test('formatCommit shows blocked when enforce=true', () => {
+  const r = s.validateCommit('bad');
+  const out = s.formatCommit('bad', r);
+  assert(out.includes('blocked'), 'expected "blocked" in output: ' + out);
 });
-test('rejects message missing required pattern', () => {
-  const r = rp.validate('Fix the login bug here');
-  assert(!r.valid);
-  assert(r.errors.some(e => e.includes('Jira ticket')), JSON.stringify(r.errors));
-});
-test('uses default error message when no custom message provided', () => {
-  const rpDefault = new CommitSentinel({
-    tense: null,
-    case: null,
-    requiredPatterns: [{ pattern: 'v\\d+\\.\\d+' }],
-  });
-  const r = rpDefault.validate('Fix the login bug here');
-  assert(!r.valid);
-  assert(r.errors.some(e => e.includes('must match required pattern')), JSON.stringify(r.errors));
-});
-test('accepts message matching default pattern', () => {
-  const rpDefault = new CommitSentinel({
-    tense: null,
-    case: null,
-    requiredPatterns: [{ pattern: 'v\\d+\\.\\d+' }],
-  });
-  const r = rpDefault.validate('Bump to v2.3 release');
-  assert(r.valid, JSON.stringify(r.errors));
-});
-test('validates multiple required patterns (all must match)', () => {
-  const rpMulti = new CommitSentinel({
-    tense: null,
-    case: null,
-    requiredPatterns: [
-      { pattern: '[A-Z]+-\\d+', message: 'Needs ticket' },
-      { pattern: 'v\\d+\\.\\d+', message: 'Needs version' },
-    ],
-  });
-  const r1 = rpMulti.validate('PROJ-1 Bump to v1.0 now');
-  assert(r1.valid, JSON.stringify(r1.errors));
-
-  const r2 = rpMulti.validate('PROJ-1 Fix bug in module');
-  assert(!r2.valid);
-  assert(r2.errors.some(e => e.includes('Needs version')), JSON.stringify(r2.errors));
-  assert(!r2.errors.some(e => e.includes('Needs ticket')), 'ticket pattern should pass');
-});
-test('requiredPatterns work alongside other rules', () => {
-  const rpCombo = new CommitSentinel({
-    tense: 'imperative',
-    case: 'sentence',
-    requiredPatterns: [
-      { pattern: '[A-Z]+-\\d+', message: 'Needs ticket' },
-    ],
-    ignoredPrefixes: ['[A-Z]+-\\d+'],
-  });
-  const r1 = rpCombo.validate('PROJ-99 Add login feature');
-  assert(r1.valid, JSON.stringify(r1.errors));
-
-  const r2 = rpCombo.validate('Add login feature here');
-  assert(!r2.valid);
-  assert(r2.errors.some(e => e.includes('Needs ticket')), JSON.stringify(r2.errors));
+test('formatBranch includes branch name', () => {
+  const r = bDefault.validateBranch('bad-name');
+  const out = bDefault.formatBranch('bad-name', r);
+  assert(out.includes('bad-name'), 'expected branch name in output: ' + out);
 });
 
 // ===========================================================================

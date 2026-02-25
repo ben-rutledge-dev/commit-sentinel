@@ -6,7 +6,8 @@
   "types": "dist/index.d.ts",
   "bin": {
     "commit-sentinel": "./bin/cli.js",
-    "commit-sentinel-hook": "./bin/hook.js"
+    "commit-sentinel-hook": "./bin/hook.js",
+    "commit-sentinel-branch-hook": "./bin/branch-hook.js"
   },
   "scripts": {
     "build": "tsc",

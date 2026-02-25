@@ -1,13 +1,13 @@
 # commit-sentinel
 
-> Enforce commit message conventions — tense, casing, length, conventional-commits prefixes, and more — via a git `commit-msg` hook.
+> Enforce commit message and branch naming conventions via a git `commit-msg` hook.
 
-If a commit message doesn't match your rules, the commit is **blocked** and the terminal shows exactly what's wrong plus a suggested fix.
+If a commit message or branch name doesn't match your rules, the operation is **blocked** (or warned) and the terminal shows what's wrong plus a suggested fix.
 
 ```
   ❌  Commit blocked by commit-sentinel
 
-  Message: "added login screen"
+  Commit: "added login screen"
 
   • Verb tense is wrong. Required: imperative mood (e.g. "Add feature", "Fix bug")
   • Subject case is wrong. Required: Sentence case (first letter capitalised)
@@ -40,31 +40,50 @@ Create `.commit-sentinel.json` in your project root (or run `npx commit-sentinel
 
 ```json
 {
-  "tense": "imperative",
-  "case": "sentence",
-  "minLength": 10,
-  "maxLength": 72,
-  "noTrailingPeriod": true,
-  "noGenericMessages": true,
-  "requireType": false,
-  "allowedTypes": ["feat", "fix", "docs", "chore", "refactor", "test", "style", "perf", "ci", "build", "revert"],
-  "scopePattern": null,
-  "forbiddenWords": ["WIP", "wip", "fixup"],
-  "ignoredPrefixes": [],
-  "requiredPatterns": [],
-  "requireBlankLineAfterSubject": false,
-  "customPattern": null
+  "commits": {
+    "enabled": true,
+    "enforce": true,
+    "tense": "imperative",
+    "case": "sentence",
+    "minLength": 10,
+    "maxLength": 72,
+    "noTrailingPeriod": true,
+    "noGenericMessages": true,
+    "requireType": false,
+    "allowedTypes": ["feat", "fix", "docs", "chore", "refactor", "test", "style", "perf", "ci", "build", "revert"],
+    "forbiddenWords": ["WIP", "wip", "fixup", "FIXUP"],
+    "ignoredPrefixes": [],
+    "requiredPatterns": [],
+    "requireBlankLineAfterSubject": false,
+    "customPattern": null
+  },
+  "branches": {
+    "enabled": true,
+    "enforce": true,
+    "tense": null,
+    "allowedPrefixes": ["feature", "bugfix", "task", "test", "tests"],
+    "requireTicketNumber": true,
+    "ticketPattern": "[0-9]{4,}",
+    "namingPattern": "kebab-case",
+    "exempt": ["main", "rc", "qa", "production", "release-*"]
+  }
 }
 ```
 
 You can also embed the config in `package.json` under a `"commitSentinel"` key.
 
+Only specify the fields you want to override — all other values use defaults.
+
 ---
 
 ## Config Reference
 
+### `commits`
+
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
+| `enabled` | `boolean` | `true` | When `false`, all commit message checks are skipped |
+| `enforce` | `boolean` | `true` | When `false`, checks run and print feedback but do **not** block the commit |
 | `tense` | `string \| null` | `"imperative"` | Verb tense of the first word. `"imperative"`, `"past"`, `"present"`, or `null` to skip |
 | `case` | `string \| null` | `"sentence"` | Casing rule. `"sentence"`, `"lower"`, `"upper"`, `"title"`, `"camel"`, or `null` |
 | `minLength` | `number` | `10` | Minimum subject line length |
@@ -73,12 +92,24 @@ You can also embed the config in `package.json` under a `"commitSentinel"` key.
 | `noGenericMessages` | `boolean` | `true` | Block single-word generic messages like `"fix"` or `"update"` |
 | `requireType` | `boolean` | `false` | Enforce a [Conventional Commits](https://www.conventionalcommits.org) type prefix (`feat:`, `fix:`, etc.) |
 | `allowedTypes` | `string[]` | `["feat","fix",...]` | Allowed type prefixes (only when `requireType: true`) |
-| `scopePattern` | `string \| null` | `null` | Regex the scope must match, e.g. `"^[a-z-]+$"` |
-| `forbiddenWords` | `string[]` | `["WIP","wip","fixup"]` | Words/phrases that must not appear in the message |
-| `ignoredPrefixes` | `string[]` | `[]` | Regex patterns for prefixes stripped before case/tense checks (e.g. ticket refs) |
-| `requiredPatterns` | `object[]` | `[]` | Patterns that must each match the subject. Each entry has `pattern` (regex string) and optional `message` (custom error) |
+| `forbiddenWords` | `string[]` | `["WIP","wip","fixup","FIXUP"]` | Words/phrases that must not appear in the message |
+| `ignoredPrefixes` | `string[]` | `[]` | Regex patterns stripped from the subject before checks (ticket IDs, team tags, etc.) |
+| `requiredPatterns` | `object[]` | `[]` | Patterns that must match the subject. Each entry: `{ pattern: string, message?: string }` |
 | `requireBlankLineAfterSubject` | `boolean` | `false` | Require a blank line between the subject and body |
 | `customPattern` | `string \| null` | `null` | A regex the entire subject must match (overrides all other checks) |
+
+### `branches`
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `enabled` | `boolean` | `true` | When `false`, all branch name checks are skipped |
+| `enforce` | `boolean` | `true` | When `false`, checks print feedback but do **not** block |
+| `tense` | `string \| null` | `null` | Verb tense of the first word in the description. `"imperative"`, `"past"`, `"present"`, or `null` to skip |
+| `allowedPrefixes` | `string[]` | `["feature","bugfix","task","test","tests"]` | Allowed prefixes (the part before `/`) |
+| `requireTicketNumber` | `boolean` | `true` | Whether a ticket number is required after the prefix |
+| `ticketPattern` | `string` | `"[0-9]{4,}"` | Regex for matching the ticket portion of the branch name |
+| `namingPattern` | `string \| null` | `"kebab-case"` | Naming convention for the description segment. `"kebab-case"`, `"snake_case"`, or `null` to skip |
+| `exempt` | `string[]` | `["main","rc","qa","production","release-*"]` | Branch names or glob patterns that bypass all checks |
 
 ---
 
@@ -87,55 +118,81 @@ You can also embed the config in `package.json` under a `"commitSentinel"` key.
 ### Strict Conventional Commits
 ```json
 {
-  "requireType": true,
-  "allowedTypes": ["feat", "fix", "docs", "chore", "refactor", "test"],
-  "tense": "imperative",
-  "case": "lower",
-  "maxLength": 72
+  "commits": {
+    "requireType": true,
+    "allowedTypes": ["feat", "fix", "docs", "chore", "refactor", "test"],
+    "tense": "imperative",
+    "case": "lower",
+    "maxLength": 72
+  }
 }
 ```
 
-### Jira-style ticket prefix
+### Commits only (no branch checks)
 ```json
 {
-  "customPattern": "^[A-Z]+-\\d+",
-  "tense": null,
-  "case": null
+  "commits": {
+    "tense": "imperative",
+    "case": "sentence"
+  },
+  "branches": {
+    "enabled": false
+  }
 }
 ```
 
-### Team tag + ticket ref (e.g. "SHARED: AB#12345 Fix login")
+### Branches only (no commit checks)
 ```json
 {
-  "requireType": true,
-  "allowedTypes": ["feat", "fix", "docs", "chore", "refactor", "test", "shared"],
-  "ignoredPrefixes": ["AB#\\d+"],
-  "tense": "imperative",
-  "case": "sentence"
+  "commits": {
+    "enabled": false
+  },
+  "branches": {
+    "tense": "imperative",
+    "allowedPrefixes": ["feature", "bugfix", "hotfix"],
+    "requireTicketNumber": true,
+    "ticketPattern": "[A-Z]+-[0-9]+",
+    "namingPattern": "kebab-case"
+  }
+}
+```
+
+### Warn-only mode (no blocking)
+```json
+{
+  "commits": {
+    "enforce": false
+  },
+  "branches": {
+    "enforce": false
+  }
 }
 ```
 
 ### Relaxed — just length and no WIP
 ```json
 {
-  "tense": null,
-  "case": null,
-  "minLength": 8,
-  "maxLength": 100,
-  "forbiddenWords": ["WIP", "wip", "TODO", "FIXME"]
+  "commits": {
+    "tense": null,
+    "case": null,
+    "minLength": 8,
+    "maxLength": 100,
+    "forbiddenWords": ["WIP", "wip", "TODO", "FIXME"]
+  },
+  "branches": {
+    "enabled": false
+  }
 }
 ```
 
-### Require a Jira ticket and version number
+### Branch naming with snake_case
 ```json
 {
-  "tense": "imperative",
-  "case": "sentence",
-  "requiredPatterns": [
-    { "pattern": "[A-Z]+-\\d+", "message": "Must include a Jira ticket (e.g. PROJ-123)" },
-    { "pattern": "v\\d+\\.\\d+", "message": "Must include a version number (e.g. v1.2)" }
-  ],
-  "ignoredPrefixes": ["[A-Z]+-\\d+"]
+  "branches": {
+    "allowedPrefixes": ["feature", "bugfix", "task"],
+    "namingPattern": "snake_case",
+    "exempt": ["main", "develop", "release-*"]
+  }
 }
 ```
 
@@ -150,8 +207,11 @@ npx commit-sentinel install
 # Remove the hook
 npx commit-sentinel uninstall
 
-# Manually validate a message (useful in CI)
+# Manually validate a commit message (useful in CI)
 npx commit-sentinel validate "feat: add login screen"
+
+# Manually validate a branch name
+npx commit-sentinel validate-branch "feature/1234-add-login"
 
 # Generate a default config file
 npx commit-sentinel init
@@ -172,6 +232,11 @@ You can manually validate the latest commit message in CI without needing the ho
   run: |
     MSG=$(git log -1 --pretty=%B)
     npx commit-sentinel validate "$MSG"
+
+- name: Validate branch name
+  run: |
+    BRANCH=$(git rev-parse --abbrev-ref HEAD)
+    npx commit-sentinel validate-branch "$BRANCH"
 ```
 
 ---
@@ -182,15 +247,24 @@ You can manually validate the latest commit message in CI without needing the ho
 const { CommitSentinel } = require('commit-sentinel');
 
 const sentinel = new CommitSentinel({
-  tense: 'imperative',
-  case: 'sentence',
-  maxLength: 72
+  commits: {
+    tense: 'imperative',
+    case: 'sentence',
+    maxLength: 72
+  },
+  branches: {
+    allowedPrefixes: ['feature', 'bugfix'],
+    namingPattern: 'kebab-case'
+  }
 });
 
-const result = sentinel.validate('Added new feature');
-// { valid: false, errors: [...], suggestions: [...] }
+const commitResult = sentinel.validateCommit('Added new feature');
+// { valid: false, enforced: true, errors: [...], suggestions: [...] }
+console.log(sentinel.formatCommit('Added new feature', commitResult));
 
-console.log(sentinel.format('Added new feature', result));
+const branchResult = sentinel.validateBranch('feature/1234-add-login');
+// { valid: true, enforced: true, errors: [], suggestions: [] }
+console.log(sentinel.formatBranch('feature/1234-add-login', branchResult));
 ```
 
 ---
@@ -198,6 +272,10 @@ console.log(sentinel.format('Added new feature', result));
 ## How the hook is installed
 
 `commit-sentinel install` writes a `commit-msg` hook to `.git/hooks/commit-msg`. If a hook already exists, the sentinel call is **appended** (chained) — it won't overwrite your existing hook.
+
+The hook validates the commit message and the current branch name. If either check fails:
+- **`enforce: true`** (default) — the commit is blocked.
+- **`enforce: false`** — feedback is printed but the commit proceeds.
 
 ---
 

@@ -17,6 +17,8 @@ export type CaseMode =
   | 'title'
   | 'camel';
 
+export type NamingPattern = 'kebab-case' | 'snake_case';
+
 export type ConventionalCommitType =
   | 'feat'
   | 'fix'
@@ -32,112 +34,76 @@ export type ConventionalCommitType =
   | string; // allow custom types
 
 // ---------------------------------------------------------------------------
+// Deep-partial utility (for consumer-facing config input)
+// ---------------------------------------------------------------------------
+
+export type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends (infer U)[]
+    ? U[]
+    : T[P] extends object
+      ? DeepPartial<T[P]>
+      : T[P];
+};
+
+// ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
 
-export interface SentinelConfig {
-  /**
-   * Required verb tense for the first word of the commit subject.
-   * Set to null to skip tense checking entirely.
-   * @default 'imperative'
-   */
+export interface CommitConfig {
+  /** When false, all commit message checks are skipped. @default true */
+  enabled: boolean;
+  /** When false, checks run and print feedback but do not block the commit. @default true */
+  enforce: boolean;
+  /** Required verb tense for the first word. null = skip. @default 'imperative' */
   tense: TenseMode | null;
-
-  /**
-   * Required casing for the subject line (or the part after the type prefix).
-   * Set to null to skip case checking.
-   * @default 'sentence'
-   */
+  /** Required casing. null = skip. @default 'sentence' */
   case: CaseMode | null;
-
-  /**
-   * Minimum allowed length for the subject line (including any type prefix).
-   * @default 10
-   */
+  /** Minimum subject length. @default 10 */
   minLength: number;
-
-  /**
-   * Maximum allowed length for the subject line.
-   * The widely-accepted git convention is 72 characters.
-   * @default 72
-   */
+  /** Maximum subject length. @default 72 */
   maxLength: number;
-
-  /**
-   * Whether to disallow a trailing period on the subject line.
-   * @default true
-   */
+  /** Disallow trailing period. @default true */
   noTrailingPeriod: boolean;
-
-  /**
-   * Whether to reject single-word generic messages like "fix", "update", "stuff".
-   * @default true
-   */
+  /** Block generic one-word messages like "fix" or "update". @default true */
   noGenericMessages: boolean;
-
-  /**
-   * When true, the subject must start with a Conventional Commits type prefix
-   * e.g. "feat: ", "fix(scope): ", "chore!: ".
-   * @default false
-   */
+  /** Require a Conventional Commits type prefix. @default false */
   requireType: boolean;
-
-  /**
-   * The set of allowed type prefixes. Only relevant when requireType is true.
-   * @default ['feat','fix','docs','chore','refactor','test','style','perf','ci','build','revert']
-   */
+  /** Allowed type prefixes (when requireType is true). @default ['feat','fix',...] */
   allowedTypes: ConventionalCommitType[];
-
-  /**
-   * A regex string the scope must match (e.g. "^[a-z-]+$").
-   * Only checked when requireType is true and a scope is present.
-   * @default null
-   */
-  scopePattern: string | null;
-
-  /**
-   * Words or phrases that must not appear anywhere in the commit message.
-   * @default ['WIP', 'wip', 'fixup', 'FIXUP']
-   */
+  /** Words/phrases that must not appear in the message. @default ['WIP','wip','fixup','FIXUP'] */
   forbiddenWords: string[];
-
-  /**
-   * Regex patterns for prefixes to strip from the subject before running
-   * case / tense checks. Each pattern is matched at the start of the
-   * working subject (after any Conventional Commits type has been removed)
-   * and stripped left-to-right.
-   *
-   * Useful for ticket references, team tags, etc.
-   * e.g. ["AB#\\d+\\s*"] strips "AB#12345 " from the front.
-   * @default []
-   */
+  /** Regex patterns that are stripped from the subject before checks (ticket IDs, team tags, etc.). @default [] */
   ignoredPrefixes: string[];
-
-  /**
-   * When true, a blank line is required between the subject and the body.
-   * @default false
-   */
-  requireBlankLineAfterSubject: boolean;
-
-  /**
-   * Regex patterns that must each match somewhere in the commit subject.
-   * Useful for enforcing version numbers, ticket IDs, etc.
-   *
-   * Each entry is an object with:
-   *   - `pattern`: a regex string to test against the subject
-   *   - `message`: (optional) custom error message shown on failure
-   *
-   * e.g. [{ "pattern": "[A-Z]+-\\d+", "message": "Must include a Jira ticket (e.g. PROJ-123)" }]
-   * @default []
-   */
+  /** Regex patterns that must each match somewhere in the subject. @default [] */
   requiredPatterns: RequiredPattern[];
-
-  /**
-   * A custom regex string the subject line must match. When provided, all
-   * other checks except forbiddenWords are bypassed.
-   * @default null
-   */
+  /** Require a blank line between subject and body. @default false */
+  requireBlankLineAfterSubject: boolean;
+  /** Custom regex the subject must match (overrides other checks). @default null */
   customPattern: string | null;
+}
+
+export interface BranchConfig {
+  /** When false, all branch name checks are skipped. @default true */
+  enabled: boolean;
+  /** When false, checks run and print feedback but do not block. @default true */
+  enforce: boolean;
+  /** Required verb tense for the first word of the description. null = skip. @default null */
+  tense: TenseMode | null;
+  /** Allowed branch prefixes (the part before /). @default ['feature','bugfix','task','test','tests'] */
+  allowedPrefixes: string[];
+  /** Whether a ticket number is required after the prefix. @default true */
+  requireTicketNumber: boolean;
+  /** Regex for matching the ticket portion of the branch name. @default '[0-9]{4,}' */
+  ticketPattern: string;
+  /** Naming convention for the description segment. null = skip. @default 'kebab-case' */
+  namingPattern: NamingPattern | null;
+  /** Branch names or glob patterns that bypass all checks. @default ['main','rc','qa','production','release-*'] */
+  exempt: string[];
+}
+
+export interface SentinelConfig {
+  commits: CommitConfig;
+  branches: BranchConfig;
 }
 
 // ---------------------------------------------------------------------------
@@ -145,8 +111,11 @@ export interface SentinelConfig {
 // ---------------------------------------------------------------------------
 
 export interface ValidationResult {
-  /** Whether the commit message passed all configured rules. */
+  /** Whether the check passed all configured rules. */
   valid: boolean;
+
+  /** Whether failures should block the operation (config enforce = true). */
+  enforced: boolean;
 
   /** Human-readable descriptions of each rule violation. */
   errors: string[];
@@ -161,6 +130,13 @@ export interface ValidationResult {
 // ---------------------------------------------------------------------------
 // Internal verb-tense types
 // ---------------------------------------------------------------------------
+
+export interface RequiredPattern {
+  /** Regex string to test against the commit subject. */
+  pattern: string;
+  /** Custom error message shown when the pattern does not match. */
+  message?: string;
+}
 
 export interface IrregularVerbForms {
   past: string;
@@ -183,11 +159,4 @@ export interface CaseValidator {
   test: (msg: string) => boolean;
   fix: (msg: string) => string;
   description: string;
-}
-
-export interface RequiredPattern {
-  /** Regex string to test against the commit subject. */
-  pattern: string;
-  /** Custom error message shown when the pattern does not match. */
-  message?: string;
 }
