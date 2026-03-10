@@ -84,9 +84,31 @@ function installHook(hookPath, hookBin, argsStr, hookName) {
       console.log(chalk.yellow(`⚠  commit-sentinel ${hookName} hook already installed.`));
       return;
     }
-    hookContent = existing.trimEnd() + `\n\nnode "${hookBin}" ${argsStr}\n`;
+    
+    // Properly compose with existing hook by capturing exit codes
+    const existingContent = existing.replace(/^#!.*\n/, '').trimEnd();
+    hookContent = `#!/bin/sh
+
+# === BEGIN existing ${hookName} hook ===
+${existingContent}
+existing_exit=$?
+# === END existing ${hookName} hook ===
+
+# === BEGIN commit-sentinel ${hookName} hook ===
+node "${hookBin}" ${argsStr}
+sentinel_exit=$?
+# === END commit-sentinel ${hookName} hook ===
+
+# Exit with failure if either hook failed
+if [ $existing_exit -ne 0 ] || [ $sentinel_exit -ne 0 ]; then
+  exit 1
+fi
+exit 0
+`;
   } else {
-    hookContent = `#!/bin/sh\nnode "${hookBin}" ${argsStr}\n`;
+    hookContent = `#!/bin/sh
+node "${hookBin}" ${argsStr}
+`;
   }
 
   fs.writeFileSync(hookPath, hookContent, { mode: 0o755 });
@@ -107,17 +129,45 @@ function uninstall() {
     const content = fs.readFileSync(hookPath, 'utf8');
     if (!content.includes('commit-sentinel')) continue;
 
-    const lines = content.split('\n');
-    const filtered = lines.filter(l => !l.includes('commit-sentinel'));
-    const newContent = filtered.join('\n').trim();
-
-    if (newContent === '#!/bin/sh' || newContent === '') {
-      fs.unlinkSync(hookPath);
+    // Extract any existing hook content that was wrapped by commit-sentinel
+    const beginMarker = `# === BEGIN existing ${hookName} hook ===`;
+    const endMarker = `# === END existing ${hookName} hook ===`;
+    
+    const beginIdx = content.indexOf(beginMarker);
+    const endIdx = content.indexOf(endMarker);
+    
+    if (beginIdx !== -1 && endIdx !== -1) {
+      // Extract the original hook content between markers
+      const existingContent = content
+        .substring(beginIdx + beginMarker.length, endIdx)
+        .trim()
+        .replace(/\nexisting_exit=\$\?$/, '') // Remove the exit capture line
+        .trim();
+      
+      if (existingContent) {
+        // Restore the original hook
+        const restoredContent = `#!/bin/sh\n${existingContent}\n`;
+        fs.writeFileSync(hookPath, restoredContent);
+        console.log(chalk.green(`✔  commit-sentinel ${hookName} hook removed, original hook restored.`));
+      } else {
+        // No existing content, remove the hook file
+        fs.unlinkSync(hookPath);
+        console.log(chalk.green(`✔  commit-sentinel ${hookName} hook removed.`));
+      }
     } else {
-      fs.writeFileSync(hookPath, newContent + '\n');
+      // Old format or manually edited - remove any lines with commit-sentinel
+      const lines = content.split('\n');
+      const filtered = lines.filter(l => !l.includes('commit-sentinel'));
+      const newContent = filtered.join('\n').trim();
+
+      if (newContent === '#!/bin/sh' || newContent === '') {
+        fs.unlinkSync(hookPath);
+      } else {
+        fs.writeFileSync(hookPath, newContent + '\n');
+      }
+      console.log(chalk.green(`✔  commit-sentinel ${hookName} hook removed.`));
     }
 
-    console.log(chalk.green(`✔  commit-sentinel ${hookName} hook removed.`));
     removed = true;
   }
 
