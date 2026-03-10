@@ -101,9 +101,28 @@ export interface BranchConfig {
   exempt: string[];
 }
 
+export interface ScopeRule {
+  /** Glob or path prefix to match staged files against. */
+  path: string;
+  /** Human-readable label for this scope (used in error messages). @default the path */
+  name?: string;
+  /** Custom error message shown when files from this scope are mixed with others. */
+  message?: string;
+}
+
+export interface ScopeConfig {
+  /** When false, all scope checks are skipped. @default false */
+  enabled: boolean;
+  /** When false, checks run and print feedback but do not block the commit. @default true */
+  enforce: boolean;
+  /** Paths that must be committed in isolation (not mixed with other changes). @default [] */
+  rules: ScopeRule[];
+}
+
 export interface SentinelConfig {
   commits: CommitConfig;
   branches: BranchConfig;
+  scope: ScopeConfig;
 }
 
 // ---------------------------------------------------------------------------

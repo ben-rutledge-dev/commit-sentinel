@@ -66,6 +66,11 @@ Create `.commit-sentinel.json` in your project root (or run `npx commit-sentinel
     "ticketPattern": "[0-9]{4,}",
     "namingPattern": "kebab-case",
     "exempt": ["main", "rc", "qa", "production", "release-*"]
+  },
+  "scope": {
+    "enabled": false,
+    "enforce": true,
+    "rules": []
   }
 }
 ```
@@ -110,6 +115,24 @@ Only specify the fields you want to override — all other values use defaults.
 | `ticketPattern` | `string` | `"[0-9]{4,}"` | Regex for matching the ticket portion of the branch name |
 | `namingPattern` | `string \| null` | `"kebab-case"` | Naming convention for the description segment. `"kebab-case"`, `"snake_case"`, or `null` to skip |
 | `exempt` | `string[]` | `["main","rc","qa","production","release-*"]` | Branch names or glob patterns that bypass all checks |
+
+### `scope`
+
+Scope rules enforce that certain paths are committed in isolation — if staged files match a scope rule **and** other staged files don't, the commit is flagged. This is useful when specific directories (e.g. shared libraries, database migrations) should always be committed separately.
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `enabled` | `boolean` | `false` | When `false`, all scope checks are skipped (opt-in) |
+| `enforce` | `boolean` | `true` | When `false`, checks print feedback but do **not** block the commit |
+| `rules` | `object[]` | `[]` | Paths that must be committed in isolation. Each entry: `{ path: string, name?: string, message?: string }` |
+
+Each rule in `rules` accepts:
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `path` | `string` | yes | Glob pattern to match staged files (e.g. `"src/shared/**"`, `"db/**"`) |
+| `name` | `string` | no | Human-readable label used in error messages (defaults to the `path`) |
+| `message` | `string` | no | Custom error message shown when the rule is violated |
 
 ---
 
@@ -196,6 +219,33 @@ Only specify the fields you want to override — all other values use defaults.
 }
 ```
 
+### Isolate shared code changes
+```json
+{
+  "scope": {
+    "enabled": true,
+    "enforce": true,
+    "rules": [
+      { "path": "src/shared/**", "name": "shared code" }
+    ]
+  }
+}
+```
+
+### Warn (don't block) when mixing scoped paths
+```json
+{
+  "scope": {
+    "enabled": true,
+    "enforce": false,
+    "rules": [
+      { "path": "src/shared/**", "name": "shared code" },
+      { "path": "db/migrations/**", "message": "Database migrations should be committed separately" }
+    ]
+  }
+}
+```
+
 ---
 
 ## CLI Commands
@@ -265,6 +315,10 @@ console.log(sentinel.formatCommit('Added new feature', commitResult));
 const branchResult = sentinel.validateBranch('feature/1234-add-login');
 // { valid: true, enforced: true, errors: [], suggestions: [] }
 console.log(sentinel.formatBranch('feature/1234-add-login', branchResult));
+
+const scopeResult = sentinel.validateScope(['src/shared/utils.ts', 'src/app.ts']);
+// { valid: false, enforced: true, errors: [...], suggestions: [...] }
+console.log(sentinel.formatScope(['src/shared/utils.ts', 'src/app.ts'], scopeResult));
 ```
 
 ---
@@ -273,7 +327,7 @@ console.log(sentinel.formatBranch('feature/1234-add-login', branchResult));
 
 `commit-sentinel install` writes a `commit-msg` hook to `.git/hooks/commit-msg`. If a hook already exists, the sentinel call is **appended** (chained) — it won't overwrite your existing hook.
 
-The hook validates the commit message and the current branch name. If either check fails:
+The hook validates staged-file scopes, the commit message, and the current branch name. If any check fails:
 - **`enforce: true`** (default) — the commit is blocked.
 - **`enforce: false`** — feedback is printed but the commit proceeds.
 

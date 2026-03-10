@@ -7,8 +7,8 @@ import type {
   SentinelConfig,
   CommitConfig,
   BranchConfig,
+  ScopeConfig,
   ValidationResult,
-  RequiredPattern,
   TenseValidator,
   CaseValidator,
   TenseMode,
@@ -50,9 +50,16 @@ export const DEFAULT_BRANCH_CONFIG: BranchConfig = {
   exempt:              ['main', 'rc', 'qa', 'production', 'release-*'],
 };
 
+export const DEFAULT_SCOPE_CONFIG: ScopeConfig = {
+  enabled: false,
+  enforce: true,
+  rules:   [],
+};
+
 export const DEFAULT_CONFIG: SentinelConfig = {
   commits:  DEFAULT_COMMIT_CONFIG,
   branches: DEFAULT_BRANCH_CONFIG,
+  scope:    DEFAULT_SCOPE_CONFIG,
 };
 
 // ---------------------------------------------------------------------------
@@ -151,6 +158,7 @@ export class CommitSentinel {
     this.config = {
       commits:  { ...DEFAULT_COMMIT_CONFIG,  ...config.commits },
       branches: { ...DEFAULT_BRANCH_CONFIG, ...config.branches },
+      scope:    { ...DEFAULT_SCOPE_CONFIG,   ...config.scope },
     };
   }
 
@@ -380,6 +388,42 @@ export class CommitSentinel {
   }
 
   /**
+   * Validate a list of staged file paths against scope-isolation rules.
+   * Each rule defines a path pattern that must not be mixed with other changes.
+   */
+  validateScope(files: string[]): ValidationResult {
+    const cfg = this.config.scope;
+
+    if (!cfg.enabled) {
+      return { valid: true, enforced: cfg.enforce, errors: [], suggestions: [] };
+    }
+
+    const errors:      string[] = [];
+    const suggestions: string[] = [];
+
+    if (files.length === 0) {
+      return { valid: true, enforced: cfg.enforce, errors: [], suggestions: [] };
+    }
+
+    for (const rule of cfg.rules) {
+      const matching    = files.filter(f => matchesGlob(f, rule.path));
+      const notMatching = files.filter(f => !matchesGlob(f, rule.path));
+
+      if (matching.length > 0 && notMatching.length > 0) {
+        const label = rule.name ?? rule.path;
+        const msg = rule.message
+          ?? `Files in "${label}" must be committed separately — do not mix with other changes`;
+        errors.push(msg);
+        suggestions.push(
+          `Stage only the ${label} files, or commit the other changes first`,
+        );
+      }
+    }
+
+    return { valid: errors.length === 0, enforced: cfg.enforce, errors, suggestions };
+  }
+
+  /**
    * Format a human-readable terminal report for a commit validation result.
    */
   formatCommit(message: string, result: ValidationResult): string {
@@ -391,6 +435,14 @@ export class CommitSentinel {
    */
   formatBranch(branchName: string, result: ValidationResult): string {
     return this._format('Branch', branchName, result);
+  }
+
+  /**
+   * Format a human-readable terminal report for a scope validation result.
+   */
+  formatScope(files: string[], result: ValidationResult): string {
+    const summary = `${files.length} staged file(s)`;
+    return this._format('Scope', summary, result);
   }
 
   /** @internal */
@@ -421,6 +473,8 @@ export type {
   SentinelConfig,
   CommitConfig,
   BranchConfig,
+  ScopeConfig,
+  ScopeRule,
   ValidationResult,
   RequiredPattern,
   VerbTense,

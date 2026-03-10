@@ -432,6 +432,135 @@ test('tense works with snake_case branches', () => {
 });
 
 // ===========================================================================
+// Scope validation
+// ===========================================================================
+
+console.log('\n\u2500\u2500 CommitSentinel: scope validation \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n');
+
+test('scope.enabled=false skips all scope checks', () => {
+  const sentinel = new CommitSentinel({ scope: { enabled: false, rules: [{ path: 'src/shared/**' }] } });
+  const r = sentinel.validateScope(['src/shared/utils.ts', 'src/app.ts']);
+  assert(r.valid, JSON.stringify(r.errors));
+});
+
+test('scope rejects mixed files when rule matches', () => {
+  const sentinel = new CommitSentinel({
+    scope: { enabled: true, rules: [{ path: 'src/shared/**' }] },
+  });
+  const r = sentinel.validateScope(['src/shared/utils.ts', 'src/app.ts']);
+  assert(!r.valid);
+  assert(r.errors.some(e => e.includes('separately')), JSON.stringify(r.errors));
+});
+
+test('scope accepts when only scoped files are staged', () => {
+  const sentinel = new CommitSentinel({
+    scope: { enabled: true, rules: [{ path: 'src/shared/**' }] },
+  });
+  const r = sentinel.validateScope(['src/shared/utils.ts', 'src/shared/types.ts']);
+  assert(r.valid, JSON.stringify(r.errors));
+});
+
+test('scope accepts when no scoped files are staged', () => {
+  const sentinel = new CommitSentinel({
+    scope: { enabled: true, rules: [{ path: 'src/shared/**' }] },
+  });
+  const r = sentinel.validateScope(['src/app.ts', 'src/main.ts']);
+  assert(r.valid, JSON.stringify(r.errors));
+});
+
+test('scope accepts empty file list', () => {
+  const sentinel = new CommitSentinel({
+    scope: { enabled: true, rules: [{ path: 'src/shared/**' }] },
+  });
+  const r = sentinel.validateScope([]);
+  assert(r.valid, JSON.stringify(r.errors));
+});
+
+test('scope uses custom name in error messages', () => {
+  const sentinel = new CommitSentinel({
+    scope: { enabled: true, rules: [{ path: 'src/shared/**', name: 'shared code' }] },
+  });
+  const r = sentinel.validateScope(['src/shared/utils.ts', 'src/app.ts']);
+  assert(!r.valid);
+  assert(r.errors.some(e => e.includes('shared code')), JSON.stringify(r.errors));
+});
+
+test('scope uses custom message', () => {
+  const sentinel = new CommitSentinel({
+    scope: { enabled: true, rules: [{ path: 'lib/**', message: 'Keep lib changes isolated!' }] },
+  });
+  const r = sentinel.validateScope(['lib/core.ts', 'src/app.ts']);
+  assert(!r.valid);
+  assert(r.errors.includes('Keep lib changes isolated!'), JSON.stringify(r.errors));
+});
+
+test('scope checks multiple rules independently', () => {
+  const sentinel = new CommitSentinel({
+    scope: { enabled: true, rules: [
+      { path: 'src/shared/**' },
+      { path: 'db/**' },
+    ] },
+  });
+  // Violates both rules
+  const r = sentinel.validateScope(['src/shared/a.ts', 'db/migration.sql', 'src/app.ts']);
+  assert(!r.valid);
+  eq(r.errors.length, 2);
+});
+
+test('scope enforce=false returns enforced=false on failure', () => {
+  const sentinel = new CommitSentinel({
+    scope: { enabled: true, enforce: false, rules: [{ path: 'src/shared/**' }] },
+  });
+  const r = sentinel.validateScope(['src/shared/utils.ts', 'src/app.ts']);
+  assert(!r.valid);
+  assert(!r.enforced, 'enforced should be false');
+});
+
+test('scope enforce=true returns enforced=true on failure', () => {
+  const sentinel = new CommitSentinel({
+    scope: { enabled: true, enforce: true, rules: [{ path: 'src/shared/**' }] },
+  });
+  const r = sentinel.validateScope(['src/shared/utils.ts', 'src/app.ts']);
+  assert(!r.valid);
+  assert(r.enforced, 'enforced should be true');
+});
+
+test('scope provides helpful suggestion', () => {
+  const sentinel = new CommitSentinel({
+    scope: { enabled: true, rules: [{ path: 'src/shared/**', name: 'shared' }] },
+  });
+  const r = sentinel.validateScope(['src/shared/utils.ts', 'src/app.ts']);
+  assert(r.suggestions.some(s => s.includes('shared')), JSON.stringify(r.suggestions));
+});
+
+test('formatScope includes file count', () => {
+  const sentinel = new CommitSentinel({
+    scope: { enabled: true, rules: [{ path: 'src/shared/**' }] },
+  });
+  const r = sentinel.validateScope(['src/shared/utils.ts', 'src/app.ts']);
+  const out = sentinel.formatScope(['src/shared/utils.ts', 'src/app.ts'], r);
+  assert(out.includes('2 staged file(s)'), 'expected file count in output: ' + out);
+});
+
+test('formatScope shows warning when enforce=false', () => {
+  const sentinel = new CommitSentinel({
+    scope: { enabled: true, enforce: false, rules: [{ path: 'src/shared/**' }] },
+  });
+  const r = sentinel.validateScope(['src/shared/utils.ts', 'src/app.ts']);
+  const out = sentinel.formatScope(['src/shared/utils.ts', 'src/app.ts'], r);
+  assert(out.includes('warning'), 'expected "warning" in output: ' + out);
+});
+
+test('formatScope shows blocked when enforce=true', () => {
+  const sentinel = new CommitSentinel({
+    scope: { enabled: true, enforce: true, rules: [{ path: 'src/shared/**' }] },
+  });
+  const r = sentinel.validateScope(['src/shared/utils.ts', 'src/app.ts']);
+  const out = sentinel.formatScope(['src/shared/utils.ts', 'src/app.ts'], r);
+  assert(out.includes('blocked'), 'expected "blocked" in output: ' + out);
+});
+
+// ===========================================================================
 // Type-safety spot checks
 // ===========================================================================
 
