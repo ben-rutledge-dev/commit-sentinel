@@ -234,8 +234,8 @@ function detectWithCompromise(word: string, fullSubject?: string): VerbTense | n
     const verb = doc.verbs().eq(0);
 
     if (verb.has('#PastTense'))                                   return 'past';
-    if (verb.has('#Gerund'))                                      return 'gerund';
     if (verb.has('#Infinitive') || verb.has('#Imperative'))       return 'imperative';
+    if (verb.has('#Gerund'))                                      return 'gerund';
     if (verb.has('#PresentTense'))                                return 'present';
 
     // Narrow to the single word if sentence-level tagging was inconclusive
